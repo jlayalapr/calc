@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+/* ── Ai Glow — Design Tokens ── */
+:root {
+  --bg:            #f7f2ea;
+  --bg-elevated:   #fbf7f0;
+  --bg-sunken:     #efe6d8;
+  --surface:       #ffffff;
+  --ink:           #1a1a17;
+  --ink-2:         #4a443c;
+  --ink-3:         #8a8074;
+  --ink-4:         #b8ad9d;
+  --line:          rgba(26, 26, 23, 0.08);
+  --line-strong:   rgba(26, 26, 23, 0.16);
+
+  --accent:        #4a6b4a;
+  --accent-ink:    #ffffff;
+  --accent-soft:   #e6ece0;
+  --accent-2:      #2d4a2d;
+
+  --warn:          #c07556;
+  --warn-soft:     #f3e2d6;
+
+  --font-serif:    'Fraunces', 'Times New Roman', serif;
+  --font-sans:     'Inter Tight', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+
+  --r-sm:  8px;
+  --r-md:  14px;
+  --r-lg:  22px;
+  --r-xl:  32px;
+
+  --shadow-1: 0 1px 2px rgba(26,18,6,0.04), 0 2px 6px rgba(26,18,6,0.04);
+  --shadow-2: 0 2px 6px rgba(26,18,6,0.05), 0 12px 30px rgba(26,18,6,0.06);
+}
+
+[data-theme="dark"] {
+  --bg:            #161513;
+  --bg-elevated:   #1e1c19;
+  --bg-sunken:     #0f0e0c;
+  --surface:       #25221e;
+  --ink:           #f5efe4;
+  --ink-2:         #cfc6b6;
+  --ink-3:         #9a9081;
+  --ink-4:         #5f584c;
+  --line:          rgba(245, 239, 228, 0.10);
+  --line-strong:   rgba(245, 239, 228, 0.18);
+
+  --accent:        #8aa880;
+  --accent-ink:    #141611;
+  --accent-soft:   #2a332a;
+  --accent-2:      #b5ccad;
+
+  --warn:          #d98a6a;
+  --warn-soft:     #3a2820;
+
+  --shadow-1: 0 1px 2px rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.3);
+  --shadow-2: 0 2px 6px rgba(0,0,0,0.45), 0 12px 30px rgba(0,0,0,0.35);
+}
+
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'ss01', 'cv11';
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--ink);
+  background: var(--bg);
+}
+
+.serif {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.eyebrow {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  font-weight: 500;
+}
+
+/* Hide scrollbars inside phone */
+.noscroll::-webkit-scrollbar { display: none; }
+.noscroll { scrollbar-width: none; }
+
+/* Scan line animation */
+@keyframes scanLine {
+  0%   { top: 10%; }
+  100% { top: 90%; }
+}
+
+/* Routine step done transition */
+.step-done { opacity: 0.55; }
+.step-done .step-title { text-decoration: line-through; }
+
+button { cursor: pointer; }
