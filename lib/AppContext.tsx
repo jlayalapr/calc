@@ -16,42 +16,58 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showScan, setShowScan] = useState(false);
+  const [showAdmin, setShowAdmin] = useState(false);
   const [routineCheckins, setRoutineCheckins] = useState<Record<string, boolean>>({});
 
-  // Auth listener
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
+      const u = session?.user ?? null;
+      setUser(u);
+      if (u) loadProfile(u);
       setAuthLoading(false);
     });
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) loadProfile(session.user.id);
+      const u = session?.user ?? null;
+      setUser(u);
+      if (u) loadProfile(u);
     }) as { data: { subscription: { unsubscribe: () => void } } };
+
     return () => subscription.unsubscribe();
   }, []);
 
-  // Load profile from Supabase when user logs in
-  async function loadProfile(userId: string) {
-    const { data } = await supabase.from('profiles').select('*').eq('id', userId).single();
-    if (data) {
-      setPersonaState((data.persona as Persona) ?? 'combination');
-      setThemeState((data.theme as Theme) ?? 'light');
-      const hasOnboarded = !!data.persona;
-      setShowOnboarding(!hasOnboarded);
-    } else {
+  async function loadProfile(u: User) {
+    const name = u.user_metadata?.name || u.email?.split('@')[0] || 'Friend';
+    const { data: existing } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', u.id)
+      .single();
+
+    if (!existing) {
+      await supabase.from('profiles').upsert({
+        id: u.id,
+        name,
+        persona: 'combination',
+        theme: 'light',
+      });
       setShowOnboarding(true);
+    } else {
+      setPersonaState((existing.persona as Persona) ?? 'combination');
+      setThemeState((existing.theme as Theme) ?? 'light');
     }
-    // Load today's checkins
+
     const today = new Date().toISOString().slice(0, 10);
     const { data: checkins } = await supabase
       .from('routine_checkins')
       .select('period, step_index')
-      .eq('user_id', userId)
+      .eq('user_id', u.id)
       .eq('date', today);
     if (checkins) {
       const map: Record<string, boolean> = {};
-      checkins.forEach(c => { map[`${c.period}-${c.step_index}`] = true; });
+      checkins.forEach((c: { period: string; step_index: number }) => {
+        map[`${c.period}-${c.step_index}`] = true;
+      });
       setRoutineCheckins(map);
     }
   }
@@ -62,16 +78,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   async function setPersona(p: Persona) {
     setPersonaState(p);
-    if (user) {
-      await supabase.from('profiles').upsert({ id: user.id, persona: p });
-    }
+    if (user) await supabase.from('profiles').upsert({ id: user.id, persona: p });
   }
 
   async function setTheme(t: Theme) {
     setThemeState(t);
-    if (user) {
-      await supabase.from('profiles').upsert({ id: user.id, theme: t });
-    }
+    if (user) await supabase.from('profiles').upsert({ id: user.id, theme: t });
   }
 
   async function toggleRoutineStep(key: string) {
@@ -79,10 +91,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const step_index = parseInt(indexStr);
     const isDone = routineCheckins[key];
     const today = new Date().toISOString().slice(0, 10);
-
-    // Optimistic update
     setRoutineCheckins(prev => ({ ...prev, [key]: !isDone }));
-
     if (user) {
       if (!isDone) {
         await supabase.from('routine_checkins').upsert({
@@ -91,10 +100,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       } else {
         await supabase.from('routine_checkins')
           .delete()
-          .eq('user_id', user.id)
-          .eq('date', today)
-          .eq('period', period)
-          .eq('step_index', step_index);
+          .eq('user_id', user.id).eq('date', today).eq('period', period).eq('step_index', step_index);
       }
     }
   }
@@ -104,28 +110,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setRoutineCheckins({});
     setActiveTab('home');
+    setShowAdmin(false);
   }
 
   if (authLoading) {
     return (
-      <div style={{
-        position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: 'var(--bg)',
-      }}>
-        <div style={{ fontFamily: 'var(--font-serif)', fontSize: 22, color: 'var(--ink-3)' }}>
-          Ai Glow
-        </div>
+      <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)' }}>
+        <div style={{ fontFamily: 'var(--font-serif)', fontSize: 22, color: 'var(--ink-3)' }}>Ai Glow</div>
       </div>
     );
   }
 
   return (
     <AppContext.Provider value={{
-      user,
-      persona, theme, activeTab, selectedProductId,
-      showOnboarding, showScan, routineCheckins,
+      user, persona, theme, activeTab, selectedProductId,
+      showOnboarding, showScan, showAdmin, routineCheckins,
       setPersona, setTheme, setActiveTab, setSelectedProductId,
-      setShowOnboarding, setShowScan, toggleRoutineStep, signOut,
+      setShowOnboarding, setShowScan, setShowAdmin, toggleRoutineStep, signOut,
     }}>
       {children}
     </AppContext.Provider>

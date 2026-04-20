@@ -64,13 +64,15 @@ export interface AppState {
   selectedProductId: string | null;
   showOnboarding: boolean;
   showScan: boolean;
-  routineCheckins: Record<string, boolean>; // key: `${period}-${index}`
+  showAdmin: boolean;
+  routineCheckins: Record<string, boolean>;
   setPersona: (p: Persona) => void;
   setTheme: (t: Theme) => void;
   setActiveTab: (t: NavTab) => void;
   setSelectedProductId: (id: string | null) => void;
   setShowOnboarding: (v: boolean) => void;
   setShowScan: (v: boolean) => void;
+  setShowAdmin: (v: boolean) => void;
   toggleRoutineStep: (key: string) => void;
   signOut: () => void;
 }
