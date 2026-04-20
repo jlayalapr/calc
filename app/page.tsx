@@ -11,10 +11,14 @@ import { Profile } from '@/components/screens/Profile';
 import { Onboarding } from '@/components/screens/Onboarding';
 import { ScanFlow } from '@/components/screens/ScanFlow';
 import { AuthScreen } from '@/components/screens/AuthScreen';
+import { AdminPanel } from '@/components/screens/AdminPanel';
 
 function AppShell() {
-  const { activeTab, setActiveTab, selectedProductId, showOnboarding, showScan, theme, user } = useApp();
+  const { activeTab, setActiveTab, selectedProductId, showOnboarding, showScan, showAdmin, theme, user } = useApp();
   const dark = theme === 'dark';
+
+  // Not logged in → show auth
+  if (!user) return <AuthScreen />;
 
   function renderScreen() {
     switch (activeTab) {
@@ -26,8 +30,16 @@ function AppShell() {
     }
   }
 
-  // Not logged in → show auth
-  if (!user) return <AuthScreen />;
+  function renderOverlays() {
+    return (
+      <>
+        {selectedProductId && <ProductDetail />}
+        {showOnboarding && <Onboarding />}
+        {showScan && <ScanFlow />}
+        {showAdmin && <AdminPanel />}
+      </>
+    );
+  }
 
   return (
     <>
@@ -41,12 +53,10 @@ function AppShell() {
       }}>
         <div style={{ flex: 1, position: 'relative', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           {renderScreen()}
-          {!showOnboarding && !showScan && (
+          {!showOnboarding && !showScan && !showAdmin && (
             <TabBar active={activeTab} onNav={setActiveTab} dark={dark} />
           )}
-          {selectedProductId && <ProductDetail />}
-          {showOnboarding && <Onboarding />}
-          {showScan && <ScanFlow />}
+          {renderOverlays()}
         </div>
       </div>
 
@@ -67,27 +77,21 @@ function AppShell() {
           boxShadow: `0 40px 80px rgba(26,18,6,0.12), 0 0 0 10px ${dark ? '#0b0a09' : '#eae3d3'}, 0 0 0 11px rgba(26,18,6,0.12)`,
           flexShrink: 0,
         }}>
-          {/* Dynamic island */}
           <div style={{
             position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)',
             width: 118, height: 34, borderRadius: 24, background: '#0b0a09', zIndex: 50,
             pointerEvents: 'none',
           }}/>
-
           <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             <StatusBar dark={dark} />
             <div style={{ flex: 1, position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
               {renderScreen()}
-              {!showOnboarding && !showScan && (
+              {!showOnboarding && !showScan && !showAdmin && (
                 <TabBar active={activeTab} onNav={setActiveTab} dark={dark} />
               )}
-              {selectedProductId && <ProductDetail />}
-              {showOnboarding && <Onboarding />}
-              {showScan && <ScanFlow />}
+              {renderOverlays()}
             </div>
           </div>
-
-          {/* Home indicator */}
           <div style={{
             position: 'absolute', bottom: 0, left: 0, right: 0, height: 24, zIndex: 60,
             display: 'flex', justifyContent: 'center', alignItems: 'flex-end',

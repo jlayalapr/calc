@@ -13,7 +13,8 @@ const SETTINGS = [
 ];
 
 export function Profile() {
-  const { persona, theme, setTheme, setPersona, signOut, user } = useApp();
+  const { persona, theme, setTheme, setPersona, signOut, user, setShowAdmin } = useApp();
+  const isAdmin = user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL || false;
   const p = PERSONAS[persona];
 
   const bars = Array.from({ length: 14 }, (_, i) => i < 12);
@@ -147,6 +148,19 @@ export function Profile() {
         <div style={{ fontSize: 12, color: 'var(--ink-4)', marginBottom: 10, textAlign: 'center' }}>
           Signed in as {user?.email}
         </div>
+        {isAdmin && (
+          <button
+            onClick={() => setShowAdmin(true)}
+            style={{
+              width: '100%', padding: '14px 0', borderRadius: 'var(--r-md)',
+              border: 'none', background: 'var(--ink)',
+              color: 'var(--bg)', fontSize: 14, fontFamily: 'var(--font-sans)',
+              marginBottom: 10,
+            }}
+          >
+            Admin panel →
+          </button>
+        )}
         <button
           onClick={signOut}
           style={{
