@@ -51,8 +51,7 @@ export function Onboarding() {
   }
 
   function finish() {
-    setPersona(selectedPersona);
-    localStorage.setItem('ai-glow-onboarded', 'true');
+    setPersona(selectedPersona); // also saves to Supabase via AppContext
     setShowOnboarding(false);
   }
 

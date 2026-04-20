@@ -57,6 +57,7 @@ export interface SkinRead {
 }
 
 export interface AppState {
+  user: import('@supabase/supabase-js').User | null;
   persona: Persona;
   theme: Theme;
   activeTab: NavTab;
@@ -71,4 +72,5 @@ export interface AppState {
   setShowOnboarding: (v: boolean) => void;
   setShowScan: (v: boolean) => void;
   toggleRoutineStep: (key: string) => void;
+  signOut: () => void;
 }

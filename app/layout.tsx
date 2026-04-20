@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Fraunces, Inter_Tight } from "next/font/google";
 import "./globals.css";
 
@@ -19,6 +19,15 @@ const interTight = Inter_Tight({
 export const metadata: Metadata = {
   title: "Ai Glow — AI Skincare Companion",
   description: "Your personal AI skincare companion",
+  appleWebApp: { capable: true, statusBarStyle: "default", title: "Ai Glow" },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

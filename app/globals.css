@@ -102,3 +102,21 @@ body {
 .step-done .step-title { text-decoration: line-through; }
 
 button { cursor: pointer; }
+
+/* ── Responsive: mobile = full screen, desktop = phone frame ── */
+@media (max-width: 600px) {
+  .mobile-shell  { display: flex !important; }
+  .desktop-stage { display: none !important; }
+}
+@media (min-width: 601px) {
+  .mobile-shell  { display: none !important; }
+  .desktop-stage { display: flex !important; }
+}
+
+/* Safe area for iPhone notch / home bar */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .mobile-shell {
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-top: env(safe-area-inset-top);
+  }
+}
