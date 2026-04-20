@@ -32,6 +32,23 @@ export interface Product {
   ingredients?: Ingredient[];
 }
 
+export interface UserProduct {
+  id: string;
+  user_id: string;
+  brand: string;
+  name: string;
+  type: string;
+  size?: string;
+  img?: string;
+  steps: string[];
+  tag?: string;
+  match: number;
+  verdict?: string;
+  meta?: { ph?: string; fragrance?: string; alcohol?: string; actives?: string };
+  ingredients?: Ingredient[];
+  created_at: string;
+}
+
 export interface Ingredient {
   name: string;
   reason: string;
@@ -58,6 +75,7 @@ export interface SkinRead {
 
 export interface AppState {
   user: import('@supabase/supabase-js').User | null;
+  profileName: string;
   persona: Persona;
   theme: Theme;
   activeTab: NavTab;
@@ -66,6 +84,7 @@ export interface AppState {
   showScan: boolean;
   showAdmin: boolean;
   routineCheckins: Record<string, boolean>;
+  userProducts: UserProduct[];
   setPersona: (p: Persona) => void;
   setTheme: (t: Theme) => void;
   setActiveTab: (t: NavTab) => void;
@@ -74,5 +93,6 @@ export interface AppState {
   setShowScan: (v: boolean) => void;
   setShowAdmin: (v: boolean) => void;
   toggleRoutineStep: (key: string) => void;
+  addProduct: (p: Omit<UserProduct, 'id' | 'user_id' | 'created_at'>) => Promise<void>;
   signOut: () => void;
 }

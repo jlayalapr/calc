@@ -1,14 +1,34 @@
 'use client';
 
 import { useApp } from '@/lib/AppContext';
-import { PRODUCTS } from '@/lib/data';
-import { PERSONAS } from '@/lib/data';
+import { PRODUCTS, PERSONAS } from '@/lib/data';
 import { Sparkles, X } from 'lucide-react';
 import { Pill } from '@/components/ui/Pill';
 
 export function ProductDetail() {
-  const { selectedProductId, setSelectedProductId, persona } = useApp();
-  const product = PRODUCTS.find(p => p.id === selectedProductId);
+  const { selectedProductId, setSelectedProductId, persona, userProducts } = useApp();
+
+  // Look up in user's scanned products first, then fall back to mock catalog
+  const userProduct = userProducts.find(p => p.id === selectedProductId);
+  const mockProduct = PRODUCTS.find(p => p.id === selectedProductId);
+
+  const product = userProduct
+    ? {
+        id: userProduct.id,
+        brand: userProduct.brand,
+        name: userProduct.name,
+        type: userProduct.type,
+        size: userProduct.size || '',
+        img: userProduct.img || '',
+        steps: userProduct.steps,
+        tag: userProduct.tag || userProduct.type,
+        opened: new Date((userProduct as any).created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        match: userProduct.match,
+        verdict: userProduct.verdict,
+        ingredients: userProduct.ingredients,
+      }
+    : mockProduct;
+
   if (!product) return null;
 
   const p = PERSONAS[persona];

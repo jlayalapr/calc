@@ -3,13 +3,14 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from './supabase';
-import { AppState, NavTab, Persona, Theme } from './types';
+import { AppState, NavTab, Persona, Theme, UserProduct } from './types';
 
 const AppContext = createContext<AppState | null>(null);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [profileName, setProfileName] = useState('');
   const [persona, setPersonaState] = useState<Persona>('combination');
   const [theme, setThemeState] = useState<Theme>('light');
   const [activeTab, setActiveTab] = useState<NavTab>('home');
@@ -18,6 +19,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [showScan, setShowScan] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
   const [routineCheckins, setRoutineCheckins] = useState<Record<string, boolean>>({});
+  const [userProducts, setUserProducts] = useState<UserProduct[]>([]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -31,14 +33,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const u = session?.user ?? null;
       setUser(u);
       if (u) loadProfile(u);
+      else {
+        setUserProducts([]);
+        setProfileName('');
+      }
     }) as { data: { subscription: { unsubscribe: () => void } } };
 
     return () => subscription.unsubscribe();
   }, []);
 
   async function loadProfile(u: User) {
-    // Always upsert profile so it exists even if signup tab was closed before insert ran
-    const name = u.user_metadata?.name || u.email?.split('@')[0] || 'Friend';
+    const fallbackName = u.user_metadata?.name || u.email?.split('@')[0] || 'Friend';
     const { data: existing } = await supabase
       .from('profiles')
       .select('*')
@@ -48,12 +53,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (!existing) {
       await supabase.from('profiles').upsert({
         id: u.id,
-        name,
+        name: fallbackName,
         persona: 'combination',
         theme: 'light',
       });
+      setProfileName(fallbackName);
       setShowOnboarding(true);
     } else {
+      setProfileName(existing.name || fallbackName);
       setPersonaState((existing.persona as Persona) ?? 'combination');
       setThemeState((existing.theme as Theme) ?? 'light');
     }
@@ -71,6 +78,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         map[`${c.period}-${c.step_index}`] = true;
       });
       setRoutineCheckins(map);
+    }
+
+    // Load user's scanned products
+    const { data: products } = await supabase
+      .from('products')
+      .select('*')
+      .eq('user_id', u.id)
+      .order('created_at', { ascending: false });
+    if (products) {
+      setUserProducts(products as UserProduct[]);
     }
   }
 
@@ -116,10 +133,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  async function addProduct(p: Omit<UserProduct, 'id' | 'user_id' | 'created_at'>) {
+    if (!user) return;
+    const { data } = await supabase
+      .from('products')
+      .insert({ ...p, user_id: user.id })
+      .select()
+      .single();
+    if (data) {
+      setUserProducts(prev => [data as UserProduct, ...prev]);
+    }
+  }
+
   async function signOut() {
     await supabase.auth.signOut();
     setUser(null);
     setRoutineCheckins({});
+    setUserProducts([]);
+    setProfileName('');
     setActiveTab('home');
     setShowAdmin(false);
   }
@@ -139,11 +170,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AppContext.Provider value={{
-      user,
+      user, profileName,
       persona, theme, activeTab, selectedProductId,
-      showOnboarding, showScan, showAdmin, routineCheckins,
+      showOnboarding, showScan, showAdmin, routineCheckins, userProducts,
       setPersona, setTheme, setActiveTab, setSelectedProductId,
-      setShowOnboarding, setShowScan, setShowAdmin, toggleRoutineStep, signOut,
+      setShowOnboarding, setShowScan, setShowAdmin, toggleRoutineStep, addProduct, signOut,
     }}>
       {children}
     </AppContext.Provider>

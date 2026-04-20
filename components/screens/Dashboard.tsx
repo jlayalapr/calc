@@ -1,16 +1,32 @@
 'use client';
 
 import { useApp } from '@/lib/AppContext';
-import { PERSONAS, PRODUCTS, ROUTINE_STEPS } from '@/lib/data';
+import { PERSONAS } from '@/lib/data';
 import { Ring } from '@/components/ui/Ring';
 import { Sparkles, ScanLine, CheckCircle } from 'lucide-react';
 
+const TYPE_TO_STEP: Record<string, string> = {
+  Cleanser: 'Cleanse',
+  Serum: 'Treat',
+  Moisturizer: 'Moisturize',
+  Sunscreen: 'Protect',
+  Exfoliant: 'Exfoliate',
+  Toner: 'Tone',
+  'Eye Cream': 'Eye care',
+  Oil: 'Oil',
+  Other: 'Apply',
+};
+
 export function Dashboard() {
-  const { persona, setActiveTab, setShowScan, toggleRoutineStep, routineCheckins } = useApp();
+  const { persona, profileName, setActiveTab, setShowScan, toggleRoutineStep, routineCheckins, userProducts } = useApp();
   const p = PERSONAS[persona];
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
-  const amSteps = ROUTINE_STEPS.AM.slice(0, 4);
+  const displayName = profileName || p.name;
+
+  // Use user's AM products if they have any, else show persona defaults
+  const amProducts = userProducts.filter(pr => pr.steps.includes('AM')).slice(0, 4);
+  const hasProducts = amProducts.length > 0;
 
   return (
     <div className="noscroll" style={{
@@ -23,7 +39,7 @@ export function Dashboard() {
         <div>
           <div className="eyebrow">{today}</div>
           <div className="serif" style={{ fontSize: 26, lineHeight: 1.1, marginTop: 4 }}>
-            Good morning, {p.name}.
+            Good morning, {displayName}.
           </div>
         </div>
         <button
@@ -35,6 +51,7 @@ export function Dashboard() {
             backgroundImage: `url(https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=70)`,
             backgroundSize: 'cover', backgroundPosition: 'center',
             border: '1px solid var(--line)', padding: 0, flexShrink: 0,
+            cursor: 'pointer',
           }}
         />
       </div>
@@ -68,56 +85,81 @@ export function Dashboard() {
       {/* Today's ritual */}
       <div style={{ marginTop: 28, padding: '0 22px 10px', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
         <div className="serif" style={{ fontSize: 20 }}>Today's ritual</div>
-        <span style={{ fontSize: 12, color: 'var(--ink-3)' }}>{amSteps.length} steps · 5 min</span>
+        {hasProducts && (
+          <span style={{ fontSize: 12, color: 'var(--ink-3)' }}>{amProducts.length} steps</span>
+        )}
       </div>
 
-      <div style={{ padding: '0 22px', display: 'grid', gap: 10 }}>
-        {amSteps.map((step, i) => {
-          const key = `AM-${i}`;
-          const done = routineCheckins[key] ?? false;
-          const isFirst = i === 0;
-          const state = done ? 'done' : isFirst ? 'now' : 'next';
-          return (
-            <div
-              key={step.id}
-              onClick={() => toggleRoutineStep(key)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 14,
-                background: state === 'now' ? 'var(--accent-soft)' : 'var(--surface)',
-                borderRadius: 16, padding: '14px 14px',
-                border: '1px solid ' + (state === 'now' ? 'rgba(74,107,74,0.2)' : 'var(--line)'),
-                opacity: done ? 0.6 : 1,
-                cursor: 'pointer',
-              }}
-            >
-              <div style={{
-                width: 28, height: 28, borderRadius: 14, flexShrink: 0,
-                background: done ? 'var(--accent)' : 'transparent',
-                border: done ? 'none' : '1.5px solid ' + (state === 'now' ? 'var(--accent)' : 'var(--ink-4)'),
-                color: done ? '#fff' : 'var(--accent)',
-                display: 'grid', placeItems: 'center',
-              }}>
-                {done
-                  ? <CheckCircle size={14} strokeWidth={2.2} color="#fff" />
-                  : state === 'now'
-                    ? <div style={{ width: 8, height: 8, borderRadius: 4, background: 'var(--accent)' }} />
-                    : null
-                }
-              </div>
-              <div style={{ flex: 1 }}>
+      {hasProducts ? (
+        <div style={{ padding: '0 22px', display: 'grid', gap: 10 }}>
+          {amProducts.map((product, i) => {
+            const key = `AM-${i}`;
+            const done = routineCheckins[key] ?? false;
+            const isFirst = i === 0;
+            const state = done ? 'done' : isFirst ? 'now' : 'next';
+            const stepName = TYPE_TO_STEP[product.type] || 'Apply';
+            return (
+              <div
+                key={product.id}
+                onClick={() => toggleRoutineStep(key)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 14,
+                  background: state === 'now' ? 'var(--accent-soft)' : 'var(--surface)',
+                  borderRadius: 16, padding: '14px 14px',
+                  border: '1px solid ' + (state === 'now' ? 'rgba(74,107,74,0.2)' : 'var(--line)'),
+                  opacity: done ? 0.6 : 1,
+                  cursor: 'pointer',
+                }}
+              >
                 <div style={{
-                  fontSize: 14, fontFamily: 'var(--font-serif)', fontWeight: 400,
-                  letterSpacing: -0.01,
-                  textDecoration: done ? 'line-through' : 'none',
-                  color: 'var(--ink)',
-                }}>{step.step}</div>
-                <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 2 }}>{step.product}</div>
+                  width: 28, height: 28, borderRadius: 14, flexShrink: 0,
+                  background: done ? 'var(--accent)' : 'transparent',
+                  border: done ? 'none' : '1.5px solid ' + (state === 'now' ? 'var(--accent)' : 'var(--ink-4)'),
+                  color: done ? '#fff' : 'var(--accent)',
+                  display: 'grid', placeItems: 'center',
+                }}>
+                  {done
+                    ? <CheckCircle size={14} strokeWidth={2.2} color="#fff" />
+                    : state === 'now'
+                      ? <div style={{ width: 8, height: 8, borderRadius: 4, background: 'var(--accent)' }} />
+                      : null
+                  }
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{
+                    fontSize: 14, fontFamily: 'var(--font-serif)', fontWeight: 400,
+                    letterSpacing: -0.01,
+                    textDecoration: done ? 'line-through' : 'none',
+                    color: 'var(--ink)',
+                  }}>{stepName}</div>
+                  <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 2 }}>{product.name} · {product.brand}</div>
+                </div>
+                <span style={{ fontSize: 11, color: 'var(--ink-4)' }}>{done ? 'Done' : `Step ${i + 1}`}</span>
               </div>
-              <span style={{ fontSize: 11, color: 'var(--ink-4)' }}>{done ? 'Done' : step.time}</span>
+            );
+          })}
+        </div>
+      ) : (
+        <div style={{ padding: '0 22px' }}>
+          <div style={{
+            padding: '20px', borderRadius: 16,
+            background: 'var(--surface)', border: '1px solid var(--line)',
+            textAlign: 'center',
+          }}>
+            <div style={{ fontSize: 14, color: 'var(--ink-3)', lineHeight: 1.5 }}>
+              Scan your products to build a personalized AM routine.
             </div>
-          );
-        })}
-      </div>
+            <button
+              onClick={() => setShowScan(true)}
+              style={{
+                marginTop: 12, padding: '10px 20px', borderRadius: 10, border: 'none',
+                background: 'var(--accent)', color: 'var(--accent-ink)',
+                fontFamily: 'var(--font-sans)', fontSize: 13, fontWeight: 500, cursor: 'pointer',
+              }}
+            >Scan a product</button>
+          </div>
+        </div>
+      )}
 
       {/* Working on */}
       <div style={{ marginTop: 28, padding: '0 22px 10px' }}>
@@ -157,7 +199,7 @@ export function Dashboard() {
             width: '100%', display: 'flex', alignItems: 'center', gap: 14,
             padding: '16px 18px', borderRadius: 'var(--r-lg)',
             border: '1px dashed var(--line-strong)', background: 'transparent',
-            textAlign: 'left',
+            textAlign: 'left', cursor: 'pointer',
           }}
         >
           <ScanLine size={22} color="var(--ink-3)" strokeWidth={1.6} />
