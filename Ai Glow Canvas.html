@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ai Glow — Canvas Overview</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #f7f2ea; --bg-elevated: #fbf7f0; --bg-sunken: #efe6d8; --surface: #fff;
+  --ink: #1a1a17; --ink-2: #4a443c; --ink-3: #8a8074; --ink-4: #b8ad9d;
+  --line: rgba(26, 26, 23, 0.08); --line-strong: rgba(26, 26, 23, 0.16);
+  --accent: #4a6b4a; --accent-ink: #fff; --accent-soft: #e6ece0; --accent-2: #2d4a2d;
+  --warn: #c07556; --warn-soft: #f3e2d6;
+  --font-serif: 'Fraunces', 'Times New Roman', serif;
+  --font-sans: 'Inter Tight', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --r-md: 14px; --r-lg: 22px;
+  --shadow-1: 0 1px 2px rgba(26,18,6,0.04), 0 2px 6px rgba(26,18,6,0.04);
+  --shadow-2: 0 2px 6px rgba(26,18,6,0.05), 0 12px 30px rgba(26,18,6,0.06);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; font-family: var(--font-sans); color: var(--ink); -webkit-font-smoothing: antialiased; }
+.serif { font-family: var(--font-serif); font-weight: 400; letter-spacing: -0.01em; }
+.eyebrow { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); font-weight: 500; }
+.noscroll::-webkit-scrollbar { display: none; }
+.noscroll { scrollbar-width: none; }
+
+/* canvas-specific overrides */
+.design-canvas { background: #ebe6dc !important; }
+
+/* Header overlay */
+.canvas-header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 18px 28px; background: rgba(247,242,234,0.85);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: space-between;
+  font-family: var(--font-sans);
+}
+.canvas-header .title-block { display: flex; align-items: center; gap: 14px; }
+.canvas-header .mark {
+  width: 32px; height: 32px; border-radius: 50%; background: var(--accent);
+  color: #fff; display: grid; place-items: center;
+  font-family: var(--font-serif); font-size: 20px; line-height: 1;
+}
+.canvas-header h1 {
+  font-family: var(--font-serif); font-size: 22px; font-weight: 500;
+  margin: 0; letter-spacing: -0.01em;
+}
+.canvas-header .crumb { color: var(--ink-3); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; padding-left: 14px; border-left: 1px solid var(--line-strong); margin-left: 4px; }
+.canvas-header .right { display: flex; align-items: center; gap: 16px; }
+.canvas-header a {
+  color: var(--ink-2); text-decoration: none; font-size: 12px;
+  padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line-strong);
+}
+.canvas-header a.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+</style>
+</head>
+<body>
+  <div class="canvas-header">
+    <div class="title-block">
+      <div class="mark serif">g</div>
+      <h1>Ai Glow</h1>
+      <div class="crumb">Canvas Overview · 7 frames</div>
+    </div>
+    <div class="right">
+      <span style="font-size: 12px; color: var(--ink-3);">Pinch to zoom · drag to pan</span>
+      <a href="Ai Glow.html" class="primary">Open prototype →</a>
+    </div>
+  </div>
+
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <script type="text/babel" src="components/design-canvas.jsx"></script>
+
+  <script type="text/babel" id="components-src"></script>
+
+  <script>
+    // Inline the components source from a separate fetch so we don't paste 1300 lines twice
+    (async () => {
+      const res = await fetch('_extracted_components.jsx');
+      const code = await res.text();
+      const s = document.getElementById('components-src');
+      s.textContent = code;
+      // re-trigger Babel
+      window.Babel.transform(code, { presets: ['react'] });
+      // Actually inject a fresh script tag so Babel auto-runs it
+      const tag = document.createElement('script');
+      tag.type = 'text/babel';
+      tag.textContent = code;
+      document.body.appendChild(tag);
+      // Manually transform & eval since dynamically appended babel scripts may not auto-run
+      try {
+        const compiled = window.Babel.transform(code, { presets: ['react'] }).code;
+        // eslint-disable-next-line no-new-func
+        (new Function(compiled))();
+      } catch (e) { console.error(e); }
+      // Mount the canvas after components are available
+      mount();
+    })();
+
+    function mount() {
+      const e = React.createElement;
+
+      function FrameAB({ persona = 'combination', screen, onboardingStep, scanStage }) {
+        // Mock state by directly rendering screen components as static
+        const tabBar = e(window.TabBar, { active: screen === 'profile' ? 'profile' : screen === 'shelf' ? 'shelf' : screen === 'routine' ? 'routine' : 'home', onNav: ()=>{}, dark: false });
+        let body;
+        if (screen === 'home')    body = e(window.Dashboard, { persona, onScan: ()=>{}, onOpenProduct: ()=>{}, onOpenProfile: ()=>{} });
+        else if (screen === 'shelf')   body = e(window.Shelf, { onOpenProduct: ()=>{} });
+        else if (screen === 'routine') body = e(window.Routine, { persona });
+        else if (screen === 'profile') body = e(window.Profile, { persona, setPersona: ()=>{} });
+        else if (screen === 'onboarding') body = e(window.Onboarding, { onDone: ()=>{} });
+        else if (screen === 'product') {
+          const prod = window.PRODUCTS[0];
+          body = e(window.ProductDetail, { product: prod, onClose: ()=>{} });
+        } else if (screen === 'scan') {
+          // Show result stage by default for canvas (most informative still)
+          body = e(window.Dashboard, { persona, onScan: ()=>{}, onOpenProduct: ()=>{}, onOpenProfile: ()=>{} });
+        }
+
+        return e(window.Phone, { dark: false, width: 360, height: 760 },
+          e('div', { style: { position: 'absolute', inset: 0, overflow: 'hidden' }, className: 'noscroll' },
+            e('div', { style: { height: 50 } }),
+            body,
+          ),
+          e('div', { style: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 25, pointerEvents: 'none' } },
+            e(window.StatusBar, { dark: false })
+          ),
+          (screen !== 'onboarding' && screen !== 'product' && screen !== 'scan') ? tabBar : null,
+        );
+      }
+
+      function ScanResultFrame() {
+        // Render scan result stage explicitly
+        const ScanStill = () => {
+          // Mimic the result stage of ScanFlow
+          return e('div', {
+            style: { position: 'absolute', inset: 0, background: 'var(--bg)', overflow: 'hidden' }
+          },
+            e('div', { style: { paddingTop: 80, paddingBottom: 40, height: '100%', overflow: 'hidden' } },
+              e('div', { style: { padding: '0 22px' } },
+                e('div', { className: 'eyebrow', style: { color: 'var(--accent)' } }, 'Match found'),
+                e('div', { className: 'serif', style: { fontSize: 28, marginTop: 8, lineHeight: 1.1 } },
+                  'Byoma Creamy', e('br'), 'Jelly Cleanser')
+              ),
+              e('div', {
+                style: {
+                  margin: '22px 22px 0', borderRadius: 22, overflow: 'hidden',
+                  aspectRatio: '5/3',
+                  background: 'url(https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=700&q=70) center/cover',
+                }
+              }),
+              e('div', {
+                style: {
+                  margin: '18px 22px 0', padding: '18px 20px',
+                  background: 'var(--accent-soft)', borderRadius: 20,
+                  border: '1px solid rgba(74,107,74,0.18)',
+                }
+              },
+                e('div', { className: 'eyebrow', style: { color: 'var(--accent-2)' } }, '✦  90% fit for your skin'),
+                e('div', { className: 'serif', style: { fontSize: 18, lineHeight: 1.3, marginTop: 8, color: 'var(--accent-2)' } },
+                  'Gentle enough for your current barrier state. Slots cleanly as your AM and PM cleanser.')
+              ),
+            ),
+          );
+        };
+        return e(window.Phone, { dark: false, width: 360, height: 760 },
+          e(ScanStill),
+          e('div', { style: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 25, pointerEvents: 'none' } },
+            e(window.StatusBar, { dark: false })
+          ),
+        );
+      }
+
+      function ScanCameraFrame() {
+        // viewfinder still
+        return e(window.Phone, { dark: true, width: 360, height: 760 },
+          e('div', {
+            style: {
+              position: 'absolute', inset: 0,
+              backgroundImage: 'url(https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=900&q=70)',
+              backgroundSize: 'cover', backgroundPosition: 'center', filter: 'brightness(0.8)',
+            }
+          }),
+          e('div', { style: { position: 'absolute', inset: 0, background: 'rgba(8,8,8,0.25)' } }),
+          // brackets
+          e('div', { style: { position: 'absolute', top: 110, left: 40, right: 40, bottom: 200, borderRadius: 18 } },
+            ['tl','tr','bl','br'].map(c => {
+              const s = { position: 'absolute', width: 36, height: 36, borderColor: '#fff', borderStyle: 'solid', borderWidth: 0 };
+              if (c === 'tl') Object.assign(s, { top: -2, left: -2, borderTopWidth: 3, borderLeftWidth: 3, borderRadius: '18px 0 0 0' });
+              if (c === 'tr') Object.assign(s, { top: -2, right: -2, borderTopWidth: 3, borderRightWidth: 3, borderRadius: '0 18px 0 0' });
+              if (c === 'bl') Object.assign(s, { bottom: -2, left: -2, borderBottomWidth: 3, borderLeftWidth: 3, borderRadius: '0 0 0 18px' });
+              if (c === 'br') Object.assign(s, { bottom: -2, right: -2, borderBottomWidth: 3, borderRightWidth: 3, borderRadius: '0 0 18px 0' });
+              return e('div', { key: c, style: s });
+            })
+          ),
+          e('div', {
+            style: {
+              position: 'absolute', left: 0, right: 0, bottom: 80, textAlign: 'center', padding: '0 40px',
+            }
+          },
+            e('div', { className: 'eyebrow', style: { color: 'rgba(255,255,255,0.7)' } }, 'Align the label'),
+            e('div', { className: 'serif', style: { fontSize: 20, marginTop: 10, color: '#fff' } },
+              'Reading the product…')
+          ),
+          e('div', { style: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 25, pointerEvents: 'none' } },
+            e(window.StatusBar, { dark: true })
+          ),
+        );
+      }
+
+      function App() {
+        return e(window.DesignCanvas, null,
+          // Section 1: Core flow
+          e(window.DCSection, { title: 'Core flow', subtitle: 'Today → Shelf → Routine → Profile · default persona: combination' },
+            e(window.DCArtboard, { label: 'Today (Dashboard)', width: 360, height: 760 }, e(FrameAB, { screen: 'home' })),
+            e(window.DCArtboard, { label: 'My Shelf', width: 360, height: 760 }, e(FrameAB, { screen: 'shelf' })),
+            e(window.DCArtboard, { label: 'Routine — AM', width: 360, height: 760 }, e(FrameAB, { screen: 'routine' })),
+            e(window.DCArtboard, { label: 'Profile', width: 360, height: 760 }, e(FrameAB, { screen: 'profile' })),
+          ),
+
+          // Section 2: First-run + scan
+          e(window.DCSection, { title: 'First run & capture', subtitle: 'How a new user comes in and how scan results land' },
+            e(window.DCArtboard, { label: 'Onboarding · skin quiz', width: 360, height: 760 }, e(FrameAB, { screen: 'onboarding' })),
+            e(window.DCArtboard, { label: 'Scan · viewfinder', width: 360, height: 760 }, e(ScanCameraFrame)),
+            e(window.DCArtboard, { label: 'Scan · result', width: 360, height: 760 }, e(ScanResultFrame)),
+            e(window.DCArtboard, { label: 'Product detail', width: 360, height: 760 }, e(FrameAB, { screen: 'product' })),
+          ),
+
+          // Section 3: Persona variants
+          e(window.DCSection, { title: 'Persona variations', subtitle: 'Same Today screen, four skin profiles — AI copy + metrics adapt' },
+            e(window.DCArtboard, { label: 'Combination', width: 360, height: 760 }, e(FrameAB, { screen: 'home', persona: 'combination' })),
+            e(window.DCArtboard, { label: 'Oily', width: 360, height: 760 }, e(FrameAB, { screen: 'home', persona: 'oily' })),
+            e(window.DCArtboard, { label: 'Dry', width: 360, height: 760 }, e(FrameAB, { screen: 'home', persona: 'dry' })),
+            e(window.DCArtboard, { label: 'Mature', width: 360, height: 760 }, e(FrameAB, { screen: 'home', persona: 'mature' })),
+          ),
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById('root')).render(e(App));
+    }
+  </script>
+</body>
+</html>

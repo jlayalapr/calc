@@ -1,0 +1,1002 @@
+/* Screens for Ai Glow — each is a self-contained phone-content component.
+   Shared header/footer bars + screen-specific body.
+*/
+
+// ───────────── Icons ─────────────
+const Icon = {
+  scan: (c = 'currentColor') => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/>
+      <rect x="7" y="9" width="10" height="6" rx="1"/>
+    </svg>
+  ),
+  home: (c = 'currentColor') => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 11l9-7 9 7v9a2 2 0 0 1-2 2h-4v-6h-6v6H5a2 2 0 0 1-2-2z"/>
+    </svg>
+  ),
+  shelf: (c = 'currentColor') => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="4" y="3" width="16" height="6" rx="1"/>
+      <rect x="4" y="11" width="16" height="6" rx="1"/>
+      <path d="M4 19h16"/>
+    </svg>
+  ),
+  routine: (c = 'currentColor') => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9"/>
+      <path d="M12 7v5l3 2"/>
+    </svg>
+  ),
+  profile: (c = 'currentColor') => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="8" r="4"/>
+      <path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>
+    </svg>
+  ),
+  sparkle: (c = 'currentColor', s = 16) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>
+      <path d="M19 4l.6 1.6L21 6l-1.4.4L19 8l-.6-1.6L17 6l1.4-.4z"/>
+    </svg>
+  ),
+  drop: (c = 'currentColor', s = 16) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3c3 4 6 7.5 6 11a6 6 0 0 1-12 0c0-3.5 3-7 6-11z"/>
+    </svg>
+  ),
+  sun: (c = 'currentColor', s = 16) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="4"/>
+      <path d="M12 2v2M12 20v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2 12h2M20 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/>
+    </svg>
+  ),
+  moon: (c = 'currentColor', s = 16) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12.8A8 8 0 1 1 11.2 3a6.5 6.5 0 0 0 9.8 9.8z"/>
+    </svg>
+  ),
+  chevron: (c = 'currentColor', s = 14) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 6l6 6-6 6"/>
+    </svg>
+  ),
+  plus: (c = 'currentColor', s = 16) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 5v14M5 12h14"/>
+    </svg>
+  ),
+  check: (c = 'currentColor', s = 16) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 12l4.5 4.5L19 7"/>
+    </svg>
+  ),
+  close: (c = 'currentColor', s = 18) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 6l12 12M18 6L6 18"/>
+    </svg>
+  ),
+  flame: (c = 'currentColor', s = 14) => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill={c} stroke="none">
+      <path d="M12 2s1 3 3 5 3 4 3 7a6 6 0 0 1-12 0c0-2 1-3 2-4 0 2 1 3 2 3-1-3 0-7 2-11z"/>
+    </svg>
+  ),
+};
+
+// ───────────── Shared bits ─────────────
+
+function StatusBar({ dark }) {
+  const c = dark ? '#f5efe4' : '#1a1a17';
+  return (
+    <div style={{
+      height: 54, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
+      padding: '0 28px 8px', fontWeight: 600, fontSize: 15, color: c, letterSpacing: -0.2,
+      position: 'relative', zIndex: 20,
+    }}>
+      <span>9:41</span>
+      <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+        <svg width="17" height="11" viewBox="0 0 17 11"><g fill={c}>
+          <rect x="0" y="7" width="3" height="4" rx="0.7"/>
+          <rect x="4.5" y="5" width="3" height="6" rx="0.7"/>
+          <rect x="9" y="2.5" width="3" height="8.5" rx="0.7"/>
+          <rect x="13.5" y="0" width="3" height="11" rx="0.7"/>
+        </g></svg>
+        <svg width="25" height="12" viewBox="0 0 25 12">
+          <rect x="0.5" y="0.5" width="21" height="11" rx="3" stroke={c} strokeOpacity="0.4" fill="none"/>
+          <rect x="2" y="2" width="16" height="8" rx="1.5" fill={c}/>
+          <path d="M23 4v4c0.7-0.2 1.3-1 1.3-2S23.7 4.2 23 4z" fill={c} fillOpacity="0.4"/>
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+function TabBar({ active, onNav, dark }) {
+  const bg = dark ? 'rgba(37,34,30,0.9)' : 'rgba(255,255,255,0.85)';
+  const items = [
+    { key: 'home',    label: 'Today',   icon: Icon.home },
+    { key: 'shelf',   label: 'Shelf',   icon: Icon.shelf },
+    { key: 'scan',    label: 'Scan',    icon: Icon.scan, primary: true },
+    { key: 'routine', label: 'Routine', icon: Icon.routine },
+    { key: 'profile', label: 'You',     icon: Icon.profile },
+  ];
+  return (
+    <div style={{
+      position: 'absolute', left: 12, right: 12, bottom: 12, zIndex: 30,
+      background: bg, borderRadius: 28, padding: '10px 8px',
+      backdropFilter: 'blur(24px) saturate(160%)', WebkitBackdropFilter: 'blur(24px) saturate(160%)',
+      boxShadow: 'var(--shadow-2)',
+      border: '1px solid var(--line)',
+      display: 'flex', alignItems: 'center', justifyContent: 'space-around',
+    }}>
+      {items.map(it => {
+        const isActive = it.key === active;
+        if (it.primary) {
+          return (
+            <button key={it.key} onClick={() => onNav(it.key)} style={{
+              width: 52, height: 52, borderRadius: 26, border: 'none',
+              background: 'var(--accent)', color: 'var(--accent-ink)',
+              display: 'grid', placeItems: 'center', cursor: 'pointer',
+              boxShadow: '0 8px 20px rgba(74, 107, 74, 0.35)',
+              transform: 'translateY(-6px)',
+            }}>{it.icon('currentColor')}</button>
+          );
+        }
+        return (
+          <button key={it.key} onClick={() => onNav(it.key)} style={{
+            flex: 1, background: 'transparent', border: 'none', cursor: 'pointer',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+            padding: '6px 0',
+            color: isActive ? 'var(--ink)' : 'var(--ink-3)',
+          }}>
+            {it.icon('currentColor')}
+            <span style={{ fontSize: 10, fontWeight: 500, letterSpacing: 0.2 }}>{it.label}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ───────────── Data ─────────────
+const PERSONAS = {
+  combination: {
+    label: 'Combination · mild dehydration',
+    name: 'Sofía',
+    concerns: ['Dehydration', 'Occasional breakouts', 'Uneven tone'],
+    hydration: 64,
+    barrier: 78,
+    tone: 52,
+    hero: "Your skin is reading a touch thirsty this morning.",
+    today: "Lead with a humectant serum before SPF. I'd skip the acid tonight — barrier's still rebuilding from Tuesday.",
+    ritualCopy: "A gentle morning. Aloe, hyaluronic, mineral SPF.",
+  },
+  oily: {
+    label: 'Oily · reactive T-zone',
+    name: 'Mateo',
+    concerns: ['Excess sebum', 'Enlarged pores', 'Post-acne marks'],
+    hydration: 71,
+    barrier: 62,
+    tone: 48,
+    hero: "Sebum is up 12% vs. your weekly baseline.",
+    today: "Niacinamide + a light zinc layer. Double cleanse tonight — yesterday's SPF was a heavy one.",
+    ritualCopy: "Balance the T-zone. Niacinamide, BHA, gel moisturizer.",
+  },
+  dry: {
+    label: 'Dry · sensitized',
+    name: 'Lena',
+    concerns: ['Dryness', 'Tightness', 'Redness on cheeks'],
+    hydration: 41,
+    barrier: 55,
+    tone: 68,
+    hero: "Barrier's a little tender — let's keep it quiet today.",
+    today: "Ceramide cream on damp skin, SPF, nothing acidic. One product less is more today.",
+    ritualCopy: "Repair mode. Ceramides, squalane, rich cream.",
+  },
+  mature: {
+    label: 'Mature · firmness focus',
+    name: 'Camila',
+    concerns: ['Fine lines', 'Loss of firmness', 'Dehydration'],
+    hydration: 58,
+    barrier: 82,
+    tone: 61,
+    hero: "Retinal night went well — firmness is trending up 4%.",
+    today: "Peptide serum, a generous moisturizer, and SPF 50. Retinal returns Thursday.",
+    ritualCopy: "Lift & protect. Peptides, vitamin C, SPF 50.",
+  },
+};
+
+// Unsplash photos — curated skincare/beauty stills
+const PRODUCTS = [
+  { id: 'p1', brand: 'La Roche-Posay', name: 'Hyalu B5 Serum',   type: 'Serum',      size: '30ml',
+    img: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=600&q=70',
+    steps: ['AM', 'PM'], tag: 'Hydrating', opened: 'Mar 12', match: 96 },
+  { id: 'p2', brand: 'The Ordinary', name: 'Niacinamide 10%',     type: 'Serum',      size: '60ml',
+    img: 'https://images.unsplash.com/photo-1631730359585-38a4935cbec4?w=600&q=70',
+    steps: ['AM'], tag: 'Balancing', opened: 'Feb 02', match: 88 },
+  { id: 'p3', brand: 'CeraVe',       name: 'Moisturizing Cream',  type: 'Moisturizer',size: '340g',
+    img: 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=600&q=70',
+    steps: ['AM', 'PM'], tag: 'Repair', opened: 'Jan 28', match: 91 },
+  { id: 'p4', brand: 'Isdin',        name: 'Fotoprotector 50+',   type: 'Sunscreen',  size: '50ml',
+    img: 'https://images.unsplash.com/photo-1556228852-80b6e5eeff06?w=600&q=70',
+    steps: ['AM'], tag: 'Mineral SPF', opened: 'Mar 30', match: 94 },
+  { id: 'p5', brand: 'Paula\'s Choice', name: '2% BHA Liquid',    type: 'Exfoliant',  size: '118ml',
+    img: 'https://images.unsplash.com/photo-1612532774233-4086ab0c9f7f?w=600&q=70',
+    steps: ['PM'], tag: 'Exfoliating', opened: 'Dec 04', match: 72 },
+  { id: 'p6', brand: 'Byoma',        name: 'Creamy Jelly Cleanser', type: 'Cleanser', size: '175ml',
+    img: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=600&q=70',
+    steps: ['AM', 'PM'], tag: 'Gentle', opened: 'Mar 01', match: 90 },
+];
+
+// ───────────── Small UI primitives ─────────────
+
+function Ring({ value, label, size = 78, stroke = 6, color = 'var(--accent)' }) {
+  const r = (size - stroke) / 2;
+  const C = 2 * Math.PI * r;
+  const off = C - (C * value) / 100;
+  return (
+    <div style={{ width: size, textAlign: 'center' }}>
+      <svg width={size} height={size} style={{ display: 'block' }}>
+        <circle cx={size/2} cy={size/2} r={r} stroke="var(--line-strong)" strokeWidth={stroke} fill="none"/>
+        <circle cx={size/2} cy={size/2} r={r} stroke={color} strokeWidth={stroke} fill="none"
+          strokeDasharray={C} strokeDashoffset={off} strokeLinecap="round"
+          transform={`rotate(-90 ${size/2} ${size/2})`} />
+        <text x="50%" y="52%" dominantBaseline="middle" textAnchor="middle"
+          style={{ fontFamily: 'var(--font-serif)', fontSize: size * 0.32, fill: 'var(--ink)' }}>
+          {value}
+        </text>
+      </svg>
+      <div className="eyebrow" style={{ marginTop: 6 }}>{label}</div>
+    </div>
+  );
+}
+
+function Pill({ children, tone = 'default' }) {
+  const map = {
+    default: { bg: 'var(--bg-sunken)', fg: 'var(--ink-2)' },
+    accent:  { bg: 'var(--accent-soft)', fg: 'var(--accent-2)' },
+    warn:    { bg: 'var(--warn-soft)', fg: 'var(--warn)' },
+  };
+  const t = map[tone];
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', gap: 4,
+      padding: '4px 10px', borderRadius: 999,
+      fontSize: 11, fontWeight: 500, letterSpacing: 0.2,
+      background: t.bg, color: t.fg,
+    }}>{children}</span>
+  );
+}
+
+// ───────────── Screens ─────────────
+
+function Dashboard({ persona, onScan, onOpenProduct }) {
+  const p = PERSONAS[persona];
+  const date = 'Sunday · April 19';
+  return (
+    <div style={{ padding: '10px 0 110px', minHeight: '100%', background: 'var(--bg)' }}>
+      {/* Top row */}
+      <div style={{ padding: '6px 22px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <div className="eyebrow">{date}</div>
+          <div className="serif" style={{ fontSize: 26, lineHeight: 1.1, marginTop: 4 }}>
+            Good morning, {p.name}.
+          </div>
+        </div>
+        <div style={{
+          width: 38, height: 38, borderRadius: 19, background: 'var(--bg-sunken)',
+          backgroundImage: `url(https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=70)`,
+          backgroundSize: 'cover', backgroundPosition: 'center',
+          border: '1px solid var(--line)',
+        }} />
+      </div>
+
+      {/* Hero read */}
+      <div style={{
+        margin: '0 22px', padding: '20px 22px 22px',
+        background: 'var(--surface)', borderRadius: 'var(--r-lg)',
+        border: '1px solid var(--line)', boxShadow: 'var(--shadow-1)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+          <span style={{ color: 'var(--accent)' }}>{Icon.sparkle('currentColor', 14)}</span>
+          <span className="eyebrow" style={{ color: 'var(--accent)' }}>This morning's read</span>
+        </div>
+        <div className="serif" style={{ fontSize: 22, lineHeight: 1.25, letterSpacing: -0.2 }}>
+          {p.hero}
+        </div>
+        <div style={{ fontSize: 14, color: 'var(--ink-2)', lineHeight: 1.5, marginTop: 10 }}>
+          {p.today}
+        </div>
+
+        <div style={{ display: 'flex', gap: 18, marginTop: 18, justifyContent: 'space-between' }}>
+          <Ring value={p.hydration} label="Hydration" />
+          <Ring value={p.barrier}   label="Barrier"  color="#7a8f6b"/>
+          <Ring value={p.tone}      label="Tone"     color="#c07556"/>
+        </div>
+      </div>
+
+      {/* Today's ritual */}
+      <div style={{ marginTop: 28, padding: '0 22px 10px', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+        <div className="serif" style={{ fontSize: 20 }}>Today's ritual</div>
+        <span style={{ fontSize: 12, color: 'var(--ink-3)' }}>4 steps · 3 min</span>
+      </div>
+
+      <div style={{ padding: '0 22px', display: 'grid', gap: 10 }}>
+        {[
+          { t: 'Gentle cleanse', sub: 'Byoma Creamy Jelly', state: 'done' },
+          { t: 'Hyalu B5 serum',  sub: '2 drops, damp skin', state: 'now'  },
+          { t: 'Ceramide cream',  sub: 'Lock it in',         state: 'next' },
+          { t: 'Mineral SPF 50',  sub: 'Two finger-lengths', state: 'next' },
+        ].map((s, i) => (
+          <div key={i} style={{
+            display: 'flex', alignItems: 'center', gap: 14,
+            background: s.state === 'now' ? 'var(--accent-soft)' : 'var(--surface)',
+            borderRadius: 16, padding: '14px 14px',
+            border: '1px solid ' + (s.state === 'now' ? 'rgba(74,107,74,0.2)' : 'var(--line)'),
+          }}>
+            <div style={{
+              width: 28, height: 28, borderRadius: 14, flexShrink: 0,
+              background: s.state === 'done' ? 'var(--accent)' : 'transparent',
+              border: s.state === 'done' ? 'none' : '1.5px solid ' + (s.state === 'now' ? 'var(--accent)' : 'var(--ink-4)'),
+              color: s.state === 'done' ? '#fff' : 'var(--accent)',
+              display: 'grid', placeItems: 'center',
+            }}>
+              {s.state === 'done' && Icon.check('currentColor', 14)}
+              {s.state === 'now' && <div style={{ width: 8, height: 8, borderRadius: 4, background: 'var(--accent)' }} />}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 15, fontWeight: 500 }}>{s.t}</div>
+              <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 2 }}>{s.sub}</div>
+            </div>
+            {s.state === 'now' && (
+              <div style={{
+                background: 'var(--accent)', color: '#fff', borderRadius: 999,
+                padding: '6px 12px', fontSize: 12, fontWeight: 500,
+              }}>Start</div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Concerns / inline cards */}
+      <div style={{ marginTop: 30, padding: '0 22px 10px' }}>
+        <div className="serif" style={{ fontSize: 20 }}>You're working on</div>
+      </div>
+      <div style={{ display: 'flex', gap: 12, padding: '0 22px', overflowX: 'auto' }} className="noscroll">
+        {p.concerns.map((c, i) => (
+          <div key={i} style={{
+            minWidth: 160, padding: '16px 16px', borderRadius: 18,
+            background: 'var(--surface)', border: '1px solid var(--line)',
+          }}>
+            <div className="eyebrow" style={{ color: 'var(--accent)' }}>Focus · {['Wk 3','Wk 1','Wk 5'][i] || 'Wk 1'}</div>
+            <div className="serif" style={{ fontSize: 18, marginTop: 8, lineHeight: 1.2 }}>{c}</div>
+            <div style={{ display: 'flex', gap: 2, marginTop: 14 }}>
+              {Array.from({ length: 12 }).map((_, k) => (
+                <div key={k} style={{
+                  flex: 1, height: 18, borderRadius: 2,
+                  background: k < (6 + i * 2) ? 'var(--accent)' : 'var(--line-strong)',
+                  opacity: k < (6 + i * 2) ? 0.9 : 1,
+                }} />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Quick scan CTA */}
+      <div style={{ padding: '26px 22px 10px' }}>
+        <button onClick={onScan} style={{
+          width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '16px 20px', borderRadius: 20, border: '1px dashed var(--line-strong)',
+          background: 'transparent', color: 'var(--ink)', cursor: 'pointer',
+          fontFamily: 'inherit',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{ color: 'var(--accent)' }}>{Icon.scan()}</span>
+            <div style={{ textAlign: 'left' }}>
+              <div style={{ fontSize: 14, fontWeight: 500 }}>Scan a new product</div>
+              <div style={{ fontSize: 12, color: 'var(--ink-3)' }}>Ingredients + fit for your skin</div>
+            </div>
+          </div>
+          {Icon.chevron('var(--ink-3)')}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function Shelf({ onOpenProduct }) {
+  const [filter, setFilter] = React.useState('All');
+  const filters = ['All', 'AM', 'PM', 'Serum', 'SPF'];
+  return (
+    <div style={{ padding: '10px 0 110px', minHeight: '100%' }}>
+      <div style={{ padding: '6px 22px 12px' }}>
+        <div className="eyebrow">12 items · 3 nearly empty</div>
+        <div className="serif" style={{ fontSize: 30, lineHeight: 1.05, marginTop: 6 }}>My Shelf</div>
+      </div>
+
+      <div style={{ display: 'flex', gap: 8, padding: '4px 22px 16px', overflowX: 'auto' }} className="noscroll">
+        {filters.map(f => (
+          <button key={f} onClick={() => setFilter(f)} style={{
+            padding: '7px 14px', borderRadius: 999, fontSize: 13,
+            border: '1px solid ' + (filter === f ? 'var(--ink)' : 'var(--line-strong)'),
+            background: filter === f ? 'var(--ink)' : 'transparent',
+            color: filter === f ? 'var(--bg)' : 'var(--ink-2)',
+            fontFamily: 'inherit', cursor: 'pointer', whiteSpace: 'nowrap',
+          }}>{f}</button>
+        ))}
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, padding: '0 22px' }}>
+        {PRODUCTS.map(p => (
+          <button key={p.id} onClick={() => onOpenProduct(p)} style={{
+            background: 'var(--surface)', border: '1px solid var(--line)',
+            borderRadius: 18, padding: 10, textAlign: 'left',
+            fontFamily: 'inherit', color: 'var(--ink)', cursor: 'pointer',
+          }}>
+            <div style={{
+              aspectRatio: '1', borderRadius: 12, overflow: 'hidden',
+              background: `url(${p.img}) center/cover, var(--bg-sunken)`,
+              position: 'relative',
+            }}>
+              <div style={{
+                position: 'absolute', top: 8, left: 8,
+                background: 'rgba(255,255,255,0.9)', color: 'var(--accent-2)',
+                borderRadius: 999, padding: '3px 8px',
+                fontSize: 10, fontWeight: 600, letterSpacing: 0.4,
+              }}>{p.match}% FIT</div>
+            </div>
+            <div style={{ marginTop: 10 }}>
+              <div className="eyebrow">{p.brand}</div>
+              <div className="serif" style={{ fontSize: 16, lineHeight: 1.15, marginTop: 4 }}>{p.name}</div>
+              <div style={{ display: 'flex', gap: 4, marginTop: 8 }}>
+                {p.steps.map(s => (
+                  <span key={s} style={{
+                    fontSize: 10, fontWeight: 600, letterSpacing: 0.4,
+                    padding: '2px 6px', borderRadius: 4,
+                    background: 'var(--bg-sunken)', color: 'var(--ink-2)',
+                  }}>{s}</span>
+                ))}
+                <span style={{ flex: 1 }} />
+                <span style={{ fontSize: 11, color: 'var(--ink-3)' }}>{p.size}</span>
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Routine({ persona }) {
+  const p = PERSONAS[persona];
+  const [tab, setTab] = React.useState('AM');
+  const amSteps = [
+    { t: 'Cleanse',     p: 'Byoma Creamy Jelly',         d: '30s, lukewarm water' },
+    { t: 'Hydrate',     p: 'La Roche-Posay Hyalu B5',    d: '2 drops, press in' },
+    { t: 'Moisturize',  p: 'CeraVe Cream',               d: 'Pea-sized, face + neck' },
+    { t: 'Protect',     p: 'Isdin Fotoprotector 50+',    d: 'Two finger-lengths' },
+  ];
+  const pmSteps = [
+    { t: 'Double cleanse', p: 'Oil + Byoma',             d: '1 min total' },
+    { t: 'Treat',          p: "Paula's Choice BHA (Mon/Wed)", d: 'Cotton pad, avoid eyes' },
+    { t: 'Hydrate',        p: 'Hyalu B5',                d: '2 drops on damp skin' },
+    { t: 'Seal',           p: 'CeraVe Cream',            d: 'Generous layer' },
+  ];
+  const steps = tab === 'AM' ? amSteps : pmSteps;
+  return (
+    <div style={{ padding: '10px 0 110px' }}>
+      <div style={{ padding: '6px 22px 10px' }}>
+        <div className="eyebrow">Built for {p.label.toLowerCase()}</div>
+        <div className="serif" style={{ fontSize: 30, lineHeight: 1.05, marginTop: 6 }}>Routine</div>
+        <div style={{ fontSize: 14, color: 'var(--ink-2)', lineHeight: 1.5, marginTop: 8, maxWidth: 300 }}>
+          {p.ritualCopy}
+        </div>
+      </div>
+
+      {/* AM/PM toggle */}
+      <div style={{ padding: '10px 22px 16px' }}>
+        <div style={{
+          display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4,
+          background: 'var(--bg-sunken)', borderRadius: 14, padding: 4,
+        }}>
+          {['AM', 'PM'].map(t => (
+            <button key={t} onClick={() => setTab(t)} style={{
+              padding: '10px 0', borderRadius: 10, border: 'none',
+              background: tab === t ? 'var(--surface)' : 'transparent',
+              boxShadow: tab === t ? 'var(--shadow-1)' : 'none',
+              color: 'var(--ink)', fontFamily: 'inherit',
+              fontSize: 13, fontWeight: 500, display: 'inline-flex',
+              alignItems: 'center', justifyContent: 'center', gap: 6, cursor: 'pointer',
+            }}>
+              {t === 'AM' ? Icon.sun('currentColor', 14) : Icon.moon('currentColor', 14)}
+              {t === 'AM' ? 'Morning' : 'Evening'}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ padding: '0 22px', position: 'relative' }}>
+        {/* vertical line */}
+        <div style={{
+          position: 'absolute', left: 36, top: 16, bottom: 16,
+          width: 1, background: 'var(--line-strong)',
+        }} />
+        {steps.map((s, i) => (
+          <div key={i} style={{ display: 'flex', gap: 14, padding: '6px 0 14px', position: 'relative' }}>
+            <div style={{
+              width: 28, height: 28, borderRadius: 14, flexShrink: 0, marginLeft: 8,
+              background: 'var(--bg)', border: '1.5px solid var(--accent)',
+              color: 'var(--accent)', display: 'grid', placeItems: 'center',
+              fontFamily: 'var(--font-serif)', fontSize: 13,
+            }}>{i + 1}</div>
+            <div style={{
+              flex: 1, background: 'var(--surface)', border: '1px solid var(--line)',
+              borderRadius: 16, padding: '14px 16px',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                <div className="serif" style={{ fontSize: 17 }}>{s.t}</div>
+                <span style={{ fontSize: 11, color: 'var(--ink-3)' }}>Step {i + 1}</span>
+              </div>
+              <div style={{ fontSize: 13, color: 'var(--ink-2)', marginTop: 2 }}>{s.p}</div>
+              <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 6 }}>{s.d}</div>
+            </div>
+          </div>
+        ))}
+
+        {/* AI coach card */}
+        <div style={{
+          marginTop: 10, background: 'var(--accent-soft)',
+          borderRadius: 18, padding: '16px 18px',
+          border: '1px solid rgba(74,107,74,0.18)',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ color: 'var(--accent-2)' }}>{Icon.sparkle('currentColor', 14)}</span>
+            <span className="eyebrow" style={{ color: 'var(--accent-2)' }}>AI Coach</span>
+          </div>
+          <div className="serif" style={{ fontSize: 17, marginTop: 8, lineHeight: 1.3, color: 'var(--accent-2)' }}>
+            "Consider alternating BHA nights with a ceramide-only evening. Your barrier metric is the strongest predictor of your tone progress."
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Profile({ persona, setPersona }) {
+  const p = PERSONAS[persona];
+  return (
+    <div style={{ padding: '10px 0 110px' }}>
+      <div style={{ padding: '6px 22px 18px' }}>
+        <div className="eyebrow">Profile</div>
+        <div className="serif" style={{ fontSize: 30, lineHeight: 1.05, marginTop: 6 }}>{p.name}</div>
+        <div style={{ fontSize: 13, color: 'var(--ink-3)', marginTop: 4 }}>{p.label}</div>
+      </div>
+
+      {/* streak card */}
+      <div style={{
+        margin: '0 22px', padding: '18px 20px',
+        borderRadius: 20, background: 'var(--ink)', color: 'var(--bg)',
+        display: 'flex', alignItems: 'center', gap: 18,
+      }}>
+        <div>
+          <div className="serif" style={{ fontSize: 44, lineHeight: 1 }}>27</div>
+          <div className="eyebrow" style={{ color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>Day streak</div>
+        </div>
+        <div style={{ width: 1, alignSelf: 'stretch', background: 'rgba(255,255,255,0.12)' }} />
+        <div style={{ flex: 1 }}>
+          <div style={{ display: 'flex', gap: 4 }}>
+            {Array.from({ length: 14 }).map((_, i) => (
+              <div key={i} style={{
+                width: 14, height: 24, borderRadius: 3,
+                background: i < 12 ? '#8aa880' : 'rgba(255,255,255,0.15)',
+              }}/>
+            ))}
+          </div>
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', marginTop: 8 }}>
+            AM + PM completed 12 of last 14 days.
+          </div>
+        </div>
+      </div>
+
+      {/* stat grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, padding: '18px 22px 8px' }}>
+        {[
+          { k: 'Skin age', v: '26', d: 'vs 28 at start' },
+          { k: 'Products tracked', v: '12', d: '3 nearly empty' },
+          { k: 'Check-ins', v: '42', d: 'last: today' },
+          { k: 'Barrier avg', v: `${p.barrier}`, d: 'weekly ↑ 3' },
+        ].map((s, i) => (
+          <div key={i} style={{
+            background: 'var(--surface)', border: '1px solid var(--line)',
+            borderRadius: 16, padding: '14px 16px',
+          }}>
+            <div className="eyebrow">{s.k}</div>
+            <div className="serif" style={{ fontSize: 30, lineHeight: 1, marginTop: 6 }}>{s.v}</div>
+            <div style={{ fontSize: 11, color: 'var(--ink-3)', marginTop: 6 }}>{s.d}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* settings list */}
+      <div style={{ padding: '14px 22px' }}>
+        <div className="eyebrow" style={{ paddingLeft: 4, marginBottom: 8 }}>Settings</div>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 18, overflow: 'hidden' }}>
+          {[
+            'Skin goals & concerns',
+            'Reminders · 7:15 AM, 10:30 PM',
+            'Environmental inputs (UV, humidity)',
+            'Sync from Apple Health',
+            'Data & privacy',
+          ].map((s, i, arr) => (
+            <div key={i} style={{
+              display: 'flex', alignItems: 'center', padding: '14px 16px',
+              borderBottom: i < arr.length - 1 ? '1px solid var(--line)' : 'none',
+            }}>
+              <span style={{ flex: 1, fontSize: 14 }}>{s}</span>
+              {Icon.chevron('var(--ink-3)')}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ProductDetail({ product, onClose }) {
+  if (!product) return null;
+  const ingredients = [
+    { n: 'Hyaluronic acid',   r: 'Great for you' , t: 'good' },
+    { n: 'Vitamin B5',        r: 'Soothes barrier', t: 'good' },
+    { n: 'Madecassoside',     r: 'Calms redness',  t: 'good' },
+    { n: 'Phenoxyethanol',    r: 'Common preservative', t: 'neutral' },
+    { n: 'Fragrance',         r: 'Low-level, fine for you', t: 'neutral' },
+  ];
+  return (
+    <div style={{ minHeight: '100%', background: 'var(--bg)', paddingBottom: 110 }}>
+      {/* Hero image */}
+      <div style={{
+        height: 360, background: `url(${product.img}) center/cover, var(--bg-sunken)`,
+        position: 'relative',
+      }}>
+        <button onClick={onClose} style={{
+          position: 'absolute', top: 54, left: 18,
+          width: 38, height: 38, borderRadius: 19, border: 'none',
+          background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(10px)',
+          display: 'grid', placeItems: 'center', cursor: 'pointer',
+        }}>{Icon.close('#1a1a17')}</button>
+        <div style={{
+          position: 'absolute', top: 54, right: 18,
+          background: 'rgba(26,26,23,0.85)', color: '#fff',
+          borderRadius: 999, padding: '8px 14px', fontSize: 12, fontWeight: 600,
+          letterSpacing: 0.3, backdropFilter: 'blur(10px)',
+        }}>{product.match}% fit for you</div>
+      </div>
+
+      <div style={{ padding: '22px 22px 10px' }}>
+        <div className="eyebrow">{product.brand} · {product.type}</div>
+        <div className="serif" style={{ fontSize: 28, lineHeight: 1.1, marginTop: 6 }}>{product.name}</div>
+        <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+          <Pill tone="accent">{product.tag}</Pill>
+          {product.steps.map(s => <Pill key={s}>{s}</Pill>)}
+          <Pill>{product.size}</Pill>
+        </div>
+      </div>
+
+      {/* Verdict card */}
+      <div style={{
+        margin: '16px 22px 0', padding: '18px 20px',
+        background: 'var(--surface)', borderRadius: 20, border: '1px solid var(--line)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ color: 'var(--accent)' }}>{Icon.sparkle('currentColor', 14)}</span>
+          <span className="eyebrow" style={{ color: 'var(--accent)' }}>AI verdict</span>
+        </div>
+        <div className="serif" style={{ fontSize: 19, marginTop: 8, lineHeight: 1.3 }}>
+          A thoughtful pick for your combination skin. The hyaluronic + B5 pair is exactly what your barrier metric is asking for this week.
+        </div>
+        <div style={{ display: 'flex', gap: 18, marginTop: 14 }}>
+          <div>
+            <div className="eyebrow">Opened</div>
+            <div style={{ fontSize: 14, fontWeight: 500, marginTop: 4 }}>{product.opened}</div>
+          </div>
+          <div>
+            <div className="eyebrow">Shelf life</div>
+            <div style={{ fontSize: 14, fontWeight: 500, marginTop: 4 }}>4 mo. left</div>
+          </div>
+          <div>
+            <div className="eyebrow">Used</div>
+            <div style={{ fontSize: 14, fontWeight: 500, marginTop: 4 }}>Daily · AM</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Ingredients */}
+      <div style={{ padding: '24px 22px 4px' }}>
+        <div className="serif" style={{ fontSize: 20 }}>Key ingredients</div>
+      </div>
+      <div style={{ padding: '10px 22px' }}>
+        {ingredients.map((ing, i) => (
+          <div key={i} style={{
+            display: 'flex', alignItems: 'center', gap: 12,
+            padding: '12px 0', borderBottom: '1px solid var(--line)',
+          }}>
+            <div style={{
+              width: 10, height: 10, borderRadius: 5, flexShrink: 0,
+              background: ing.t === 'good' ? 'var(--accent)' : 'var(--ink-4)',
+            }} />
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 14, fontWeight: 500 }}>{ing.n}</div>
+              <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 2 }}>{ing.r}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Onboarding({ onDone }) {
+  const [step, setStep] = React.useState(0);
+  const questions = [
+    {
+      title: 'How does your skin usually feel by midday?',
+      opts: ['Tight and a bit dry', 'Balanced, comfortable', 'Shiny in the T-zone', 'Very oily all over'],
+    },
+    {
+      title: 'What are you most hoping to improve?',
+      opts: ['Hydration', 'Breakouts', 'Fine lines', 'Even tone', 'Redness'],
+    },
+    {
+      title: 'How many products are in your current routine?',
+      opts: ['1–2, I keep it simple', '3–5, a solid routine', '6+, I love a ritual'],
+    },
+  ];
+  const total = questions.length + 1;
+  const q = questions[step];
+
+  if (step === questions.length) {
+    return (
+      <div style={{ padding: '40px 28px', minHeight: '100%', display: 'flex', flexDirection: 'column' }}>
+        <div className="eyebrow">Step {total}/{total}</div>
+        <div className="serif" style={{ fontSize: 34, lineHeight: 1.05, marginTop: 12, letterSpacing: -0.4 }}>
+          Let's look at you.
+        </div>
+        <div style={{ fontSize: 15, color: 'var(--ink-2)', lineHeight: 1.5, marginTop: 12 }}>
+          A quick selfie in natural light. We analyze hydration, barrier and tone — the photo never leaves your device.
+        </div>
+
+        <div style={{
+          marginTop: 30, aspectRatio: '3/4', borderRadius: 28,
+          background: 'linear-gradient(160deg, #e6ece0, #f7f2ea)',
+          position: 'relative', overflow: 'hidden',
+          border: '1px solid var(--line)',
+        }}>
+          <div style={{
+            position: 'absolute', inset: 40, borderRadius: '50%',
+            border: '1.5px dashed var(--accent)',
+          }}/>
+          <div style={{
+            position: 'absolute', left: 0, right: 0, bottom: 18, textAlign: 'center',
+            fontSize: 12, color: 'var(--ink-3)',
+          }}>Align your face inside the oval</div>
+        </div>
+
+        <div style={{ marginTop: 'auto', paddingTop: 30 }}>
+          <button onClick={onDone} style={{
+            width: '100%', padding: '16px', borderRadius: 18, border: 'none',
+            background: 'var(--accent)', color: '#fff', fontSize: 16, fontWeight: 500,
+            fontFamily: 'inherit', cursor: 'pointer',
+          }}>Take the photo</button>
+          <button onClick={onDone} style={{
+            width: '100%', padding: '12px', borderRadius: 18, border: 'none',
+            background: 'transparent', color: 'var(--ink-2)', fontSize: 14,
+            fontFamily: 'inherit', cursor: 'pointer', marginTop: 6,
+          }}>Skip for now</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ padding: '40px 28px', minHeight: '100%', display: 'flex', flexDirection: 'column' }}>
+      <div className="eyebrow">Step {step + 1}/{total}</div>
+      <div className="serif" style={{ fontSize: 30, lineHeight: 1.1, marginTop: 12, letterSpacing: -0.3 }}>
+        {q.title}
+      </div>
+
+      <div style={{ marginTop: 30, display: 'grid', gap: 10 }}>
+        {q.opts.map((o, i) => (
+          <button key={i} onClick={() => setStep(step + 1)} style={{
+            textAlign: 'left', padding: '16px 18px', borderRadius: 16,
+            background: 'var(--surface)', border: '1px solid var(--line)',
+            color: 'var(--ink)', fontSize: 15, fontFamily: 'inherit', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          }}>
+            <span>{o}</span>
+            {Icon.chevron('var(--ink-3)')}
+          </button>
+        ))}
+      </div>
+
+      <div style={{ marginTop: 'auto', display: 'flex', gap: 4, paddingTop: 30 }}>
+        {Array.from({ length: total }).map((_, i) => (
+          <div key={i} style={{
+            flex: 1, height: 3, borderRadius: 2,
+            background: i <= step ? 'var(--accent)' : 'var(--line-strong)',
+          }}/>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ───────────── Scan flow ─────────────
+
+function ScanFlow({ onDone }) {
+  const [stage, setStage] = React.useState('scan'); // scan → analyzing → result
+  React.useEffect(() => {
+    if (stage === 'scan') { const t = setTimeout(() => setStage('analyzing'), 1800); return () => clearTimeout(t); }
+    if (stage === 'analyzing') { const t = setTimeout(() => setStage('result'), 2000); return () => clearTimeout(t); }
+  }, [stage]);
+
+  return (
+    <div style={{
+      position: 'absolute', inset: 0, zIndex: 40,
+      background: stage === 'result' ? 'var(--bg)' : '#0b0b0a',
+      color: stage === 'result' ? 'var(--ink)' : '#fff',
+      display: 'flex', flexDirection: 'column', overflow: 'hidden',
+    }}>
+      {/* Close */}
+      <button onClick={onDone} style={{
+        position: 'absolute', top: 58, right: 18, zIndex: 50,
+        width: 38, height: 38, borderRadius: 19, border: 'none',
+        background: stage === 'result' ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.15)',
+        color: stage === 'result' ? '#1a1a17' : '#fff',
+        display: 'grid', placeItems: 'center', cursor: 'pointer',
+        backdropFilter: 'blur(10px)',
+      }}>{Icon.close('currentColor')}</button>
+
+      {stage !== 'result' && (
+        <>
+          {/* Camera viewfinder — photo of a bottle */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            backgroundImage: 'url(https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=900&q=70)',
+            backgroundSize: 'cover', backgroundPosition: 'center',
+            filter: 'brightness(0.8)',
+          }}/>
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(8,8,8,0.25)' }}/>
+
+          {/* Corner brackets */}
+          <div style={{ position: 'absolute', inset: 110, borderRadius: 18 }}>
+            {['tl','tr','bl','br'].map(c => {
+              const s = {
+                position: 'absolute', width: 36, height: 36,
+                borderColor: '#fff', borderStyle: 'solid', borderWidth: 0,
+              };
+              if (c === 'tl') Object.assign(s, { top: -2, left: -2, borderTopWidth: 3, borderLeftWidth: 3, borderRadius: '18px 0 0 0' });
+              if (c === 'tr') Object.assign(s, { top: -2, right: -2, borderTopWidth: 3, borderRightWidth: 3, borderRadius: '0 18px 0 0' });
+              if (c === 'bl') Object.assign(s, { bottom: -2, left: -2, borderBottomWidth: 3, borderLeftWidth: 3, borderRadius: '0 0 0 18px' });
+              if (c === 'br') Object.assign(s, { bottom: -2, right: -2, borderBottomWidth: 3, borderRightWidth: 3, borderRadius: '0 0 18px 0' });
+              return <div key={c} style={s}/>;
+            })}
+            {stage === 'scan' && (
+              <div className="scanline" style={{
+                position: 'absolute', left: 0, right: 0,
+                height: 2, background: 'linear-gradient(90deg, transparent, #8aa880, transparent)',
+                boxShadow: '0 0 18px #8aa880',
+                animation: 'scan 1.6s linear infinite',
+              }}/>
+            )}
+          </div>
+
+          {/* Bottom copy */}
+          <div style={{
+            position: 'absolute', left: 0, right: 0, bottom: 40,
+            textAlign: 'center', padding: '0 40px',
+          }}>
+            {stage === 'scan' && (
+              <>
+                <div className="eyebrow" style={{ color: 'rgba(255,255,255,0.7)' }}>Align the label</div>
+                <div className="serif" style={{ fontSize: 22, marginTop: 10, color: '#fff' }}>
+                  Reading the product…
+                </div>
+              </>
+            )}
+            {stage === 'analyzing' && (
+              <>
+                <div className="eyebrow" style={{ color: 'rgba(255,255,255,0.7)' }}>Matching to you</div>
+                <div className="serif" style={{ fontSize: 22, marginTop: 10, color: '#fff' }}>
+                  Cross-referencing 36 ingredients…
+                </div>
+                <div style={{
+                  marginTop: 16, height: 3, borderRadius: 2,
+                  background: 'rgba(255,255,255,0.15)', overflow: 'hidden',
+                }}>
+                  <div style={{
+                    height: '100%', background: '#8aa880', borderRadius: 2,
+                    animation: 'grow 2s ease-out forwards',
+                  }}/>
+                </div>
+              </>
+            )}
+          </div>
+
+          <style>{`
+            @keyframes scan { 0% { top: 0 } 50% { top: calc(100% - 2px) } 100% { top: 0 } }
+            @keyframes grow { from { width: 0 } to { width: 100% } }
+          `}</style>
+        </>
+      )}
+
+      {stage === 'result' && (
+        <div style={{ paddingTop: 80, paddingBottom: 40, overflow: 'auto', flex: 1 }}>
+          <div style={{ padding: '0 22px' }}>
+            <div className="eyebrow" style={{ color: 'var(--accent)' }}>Match found</div>
+            <div className="serif" style={{ fontSize: 30, marginTop: 8, lineHeight: 1.1 }}>
+              Byoma Creamy<br/>Jelly Cleanser
+            </div>
+          </div>
+
+          <div style={{
+            margin: '22px 22px 0', borderRadius: 22, overflow: 'hidden',
+            aspectRatio: '5/3', background: 'url(https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=700&q=70) center/cover',
+          }}/>
+
+          <div style={{
+            margin: '18px 22px 0', padding: '20px 22px',
+            background: 'var(--accent-soft)', borderRadius: 20,
+            border: '1px solid rgba(74,107,74,0.18)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ color: 'var(--accent-2)' }}>{Icon.sparkle('currentColor', 14)}</span>
+              <span className="eyebrow" style={{ color: 'var(--accent-2)' }}>90% fit for your skin</span>
+            </div>
+            <div className="serif" style={{ fontSize: 19, lineHeight: 1.3, marginTop: 10, color: 'var(--accent-2)' }}>
+              Gentle enough for your current barrier state. Slots cleanly as your AM and PM cleanser.
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, padding: '18px 22px' }}>
+            {[
+              { k: 'pH',          v: '5.5' },
+              { k: 'Fragrance',   v: 'Low' },
+              { k: 'Alcohol',     v: 'None' },
+              { k: 'Actives',     v: '0' },
+            ].map((s, i) => (
+              <div key={i} style={{
+                background: 'var(--surface)', border: '1px solid var(--line)',
+                borderRadius: 14, padding: '12px 14px',
+              }}>
+                <div className="eyebrow">{s.k}</div>
+                <div className="serif" style={{ fontSize: 22, marginTop: 4 }}>{s.v}</div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ padding: '8px 22px 0' }}>
+            <button onClick={onDone} style={{
+              width: '100%', padding: '16px', borderRadius: 18, border: 'none',
+              background: 'var(--accent)', color: '#fff', fontSize: 15, fontWeight: 500,
+              fontFamily: 'inherit', cursor: 'pointer',
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            }}>
+              {Icon.plus('#fff', 16)} Add to my shelf
+            </button>
+            <button onClick={onDone} style={{
+              width: '100%', padding: '14px', borderRadius: 18, border: 'none',
+              background: 'transparent', color: 'var(--ink-2)', fontSize: 14,
+              fontFamily: 'inherit', cursor: 'pointer', marginTop: 4,
+            }}>Not interested</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+Object.assign(window, {
+  Dashboard, Shelf, Routine, Profile, ProductDetail, Onboarding, ScanFlow,
+  StatusBar, TabBar, PERSONAS, PRODUCTS, Icon,
+});
